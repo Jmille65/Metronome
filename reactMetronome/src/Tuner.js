@@ -9,12 +9,16 @@ class Tuner extends React.Component {
     this.state = {
       frequency: 440,
       playing: false,
-      data: arr
+      data: arr,
+      sampleRate: 50
     }
 
   }
 
-  // TODO
+  handleSampleRateAdjustment = val => {
+    this.setState({sampleRate: val});
+  }
+
   toggleState = () => {
     if (this.state.playing) {
       this.setState({playing: false});
@@ -31,7 +35,7 @@ class Tuner extends React.Component {
           playing: true,
           stream: stream,
           source: source,
-          interval: setInterval(this.updateFrequency, 50),
+          interval: setInterval(this.updateFrequency, this.state.sampleRate),
           analyser: analyser
         });
       });
@@ -66,6 +70,7 @@ class Tuner extends React.Component {
           Frequency: {this.state.frequency}
         </TunerDisplay>
         <ToggleButton playing={this.state.playing} click={this.toggleState} />
+        <RenderRateSlider sampleRate={this.state.sampleRate} handle={this.handleSampleRateAdjustment} />
         <VictoryBar data={Array.from(this.state.data)} />
 
 
@@ -78,6 +83,21 @@ class ToggleButton extends React.Component {
   render() {
     var text = this.props.playing ? "Stop" : "Start";
     return <button onClick={this.props.click}>{text}</button>
+  }
+}
+
+class RenderRateSlider extends React.Component {
+  handleInput = e => {
+    this.props.handle(e.target.value);
+  }
+
+  render() {
+    return (
+      <div>
+        <input type="range" min={50} max={2000} value={this.props.sampleRate} onInput={this.handleInput} />
+        <label>Sample rate: {this.props.sampleRate}ms - If things are lagging, adjust this until it is better</label>
+      </div>
+    );
   }
 }
 
